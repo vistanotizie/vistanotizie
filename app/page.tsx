@@ -1,7 +1,27 @@
-import NewsClient from "@/components/NewsClient";
-import { mockNews } from "@/lib/mock-news";
+﻿import NewsClient from "@/components/NewsClient";
+import type { NewsItem } from "@/lib/types";
 
-export default function HomePage() {
+async function getNews(): Promise<NewsItem[]> {
+  const baseUrl =
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
+  const response = await fetch(`${baseUrl}/api/news`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  return data.items || [];
+}
+
+export default async function HomePage() {
+  const items = await getNews();
+
   return (
     <main className="shell">
       <header className="topbar">
@@ -25,10 +45,10 @@ export default function HomePage() {
         </p>
       </section>
 
-      <NewsClient items={mockNews} />
+      <NewsClient items={items} />
 
       <p className="note">
-        Nota: i contenuti inclusi sono dimostrativi. Per la produzione conviene usare l&apos;AI
+        Nota: i contenuti inclusi sono mostrati tramite API. Per la produzione conviene usare l&apos;AI
         per classificazione, deduplicazione e riassunto, mantenendo sempre il link alla fonte originale.
       </p>
     </main>
