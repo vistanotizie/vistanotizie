@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Category, NewsItem } from "@/lib/types";
 
 const categories: Array<{ value: "tutte" | Category; label: string }> = [
@@ -12,19 +12,38 @@ const categories: Array<{ value: "tutte" | Category; label: string }> = [
   { value: "locale", label: "Locale" }
 ];
 
-const cities = ["Rimini", "Milano", "Roma", "Bologna", "Torino"];
+const cities = ["Rimini", "Milano", "Roma", "Bologna", "Torino", "Italia"];
 
-export default function NewsClient({ items }: { items: NewsItem[] }) {
+export default function NewsClient() {
+  const [items, setItems] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [city, setCity] = useState("Rimini");
+  const [city, setCity] = useState("Italia");
   const [category, setCategory] = useState<"tutte" | Category>("tutte");
+
+  useEffect(() => {
+    async function loadNews() {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/news", { cache: "no-store" });
+        const data = await response.json();
+        setItems(data.items || []);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadNews();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     return items.filter((item) => {
       const categoryOk = category === "tutte" || item.category === category;
-      const cityOk = item.category !== "locale" || item.city === city;
+      const cityOk = city === "Italia" || item.category !== "locale" || item.city === city;
       const haystack = `${item.title} ${item.summary} ${item.city} ${item.tags.join(" ")}`.toLowerCase();
       const searchOk = haystack.includes(q);
       return categoryOk && cityOk && searchOk;
@@ -47,7 +66,9 @@ export default function NewsClient({ items }: { items: NewsItem[] }) {
           <span>📍</span>
           <select value={city} onChange={(e) => setCity(e.target.value)}>
             {cities.map((entry) => (
-              <option key={entry} value={entry}>{entry}</option>
+              <option key={entry} value={entry}>
+                {entry}
+              </option>
             ))}
           </select>
         </div>
@@ -56,7 +77,9 @@ export default function NewsClient({ items }: { items: NewsItem[] }) {
           <span>🧭</span>
           <select value={category} onChange={(e) => setCategory(e.target.value as "tutte" | Category)}>
             {categories.map((entry) => (
-              <option key={entry.value} value={entry.value}>{entry.label}</option>
+              <option key={entry.value} value={entry.value}>
+                {entry.label}
+              </option>
             ))}
           </select>
         </div>
@@ -75,12 +98,14 @@ export default function NewsClient({ items }: { items: NewsItem[] }) {
       </div>
 
       <div className="meta">
-        <span>{filtered.length} notizie visibili</span>
+        <span>
+          {loading ? "Caricamento notizie..." : `${filtered.length} notizie visibili`}
+        </span>
         <span>Città selezionata: {city}</span>
       </div>
 
       <section className="grid">
-        {filtered.map((item) => (
+        {!loading && filtered.map((item) => (
           <article key={item.id} className="card">
             <div className="media">
               <img src={item.image} alt={item.title} />
@@ -99,7 +124,9 @@ export default function NewsClient({ items }: { items: NewsItem[] }) {
 
               <div className="tags">
                 {item.tags.map((tag) => (
-                  <span key={tag} className="tag">{tag}</span>
+                  <span key={tag} className="tag">
+                    {tag}
+                  </span>
                 ))}
               </div>
 
