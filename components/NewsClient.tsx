@@ -12,8 +12,6 @@ const categories: Array<{ value: "tutte" | Category; label: string }> = [
   { value: "locale", label: "Locale" }
 ];
 
-const cities = ["Rimini", "Milano", "Roma", "Bologna", "Torino", "Italia"];
-
 export default function NewsClient() {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,12 +36,33 @@ export default function NewsClient() {
     loadNews();
   }, []);
 
+  const availableCities = useMemo(() => {
+    const values = items
+      .map((item) => item.city?.trim())
+      .filter((value): value is string => Boolean(value) && value.length > 0);
+
+    const uniqueCities = Array.from(new Set(values))
+      .sort((a, b) => a.localeCompare(b, "it"));
+
+    if (!uniqueCities.includes("Italia")) {
+      uniqueCities.unshift("Italia");
+    }
+
+    return uniqueCities;
+  }, [items]);
+
+  useEffect(() => {
+    if (!availableCities.includes(city)) {
+      setCity("Italia");
+    }
+  }, [availableCities, city]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     return items.filter((item) => {
       const categoryOk = category === "tutte" || item.category === category;
-      const cityOk = city === "Italia" || item.category !== "locale" || item.city === city;
+      const cityOk = city === "Italia" || item.city === city;
       const haystack = `${item.title} ${item.summary} ${item.city} ${item.tags.join(" ")}`.toLowerCase();
       const searchOk = haystack.includes(q);
       return categoryOk && cityOk && searchOk;
@@ -65,7 +84,7 @@ export default function NewsClient() {
         <div className="box">
           <span>📍</span>
           <select value={city} onChange={(e) => setCity(e.target.value)}>
-            {cities.map((entry) => (
+            {availableCities.map((entry) => (
               <option key={entry} value={entry}>
                 {entry}
               </option>
