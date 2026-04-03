@@ -35,7 +35,7 @@ const fallbackNews: NewsItem[] = [
 
 function stripHtml(value: string) {
   return value
-    .replace(/<!\\[CDATA\\[(.*?)\\]\\]>/gis, "$1")
+    .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/gi, "$1")
     .replace(/<[^>]+>/g, "")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
