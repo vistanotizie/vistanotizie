@@ -4,38 +4,14 @@ import type { Category, NewsItem } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const RSS_FEEDS = [
-  {
-    url: "https://www.ansa.it/sito/ansait_rss.xml",
-    source: "ANSA"
-  },
-  {
-    url: "https://www.repubblica.it/rss/homepage/rss2.0.xml",
-    source: "la Repubblica"
-  },
-  {
-    url: "https://www.ilsole24ore.com/rss/italia.xml",
-    source: "Il Sole 24 Ore"
-  }
+  { url: "https://www.ansa.it/sito/ansait_rss.xml", source: "ANSA" },
+  { url: "https://www.repubblica.it/rss/homepage/rss2.0.xml", source: "la Repubblica" },
+  { url: "https://www.ilsole24ore.com/rss/italia.xml", source: "Il Sole 24 Ore" }
 ];
 
-const fallbackNews: NewsItem[] = [
-  {
-    id: 1001,
-    title: "Feed temporaneamente non disponibile",
-    summary: "Questa notizia di fallback appare quando i feed esterni non rispondono correttamente dal server.",
-    category: "cronaca",
-    city: "Italia",
-    date: new Date().toLocaleString("it-IT"),
-    sourceName: "VistaNotizie",
-    sourceUrl: "https://vistanotizie.it",
-    image: "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    tags: ["fallback", "feed"]
-  }
-];
-
-function stripHtml(value: string) {
+function stripHtml(value: string): string {
   return value
-    .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/gi, "$1")
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1")
     .replace(/<[^>]+>/g, "")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
@@ -44,7 +20,7 @@ function stripHtml(value: string) {
     .trim();
 }
 
-function extractTag(item: string, tag: string) {
+function extractTag(item: string, tag: string): string {
   const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
   const match = item.match(regex);
   return match ? stripHtml(match[1]) : "";
@@ -71,20 +47,18 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
     });
 
     if (!response.ok) {
-      console.error("RSS non raggiungibile:", feed.url, response.status);
       return [];
     }
 
     const xml = await response.text();
 
-    if (!xml || !xml.includes("<item")) {
-      console.error("RSS senza item validi:", feed.url);
+    if (!xml.includes("<item")) {
       return [];
     }
 
     const rawItems = xml.split(/<item[ >]/i).slice(1);
 
-    const parsed = rawItems
+    const parsed: NewsItem[] = rawItems
       .map((raw, index) => {
         const normalized = "<item " + raw;
 
@@ -108,13 +82,12 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
           sourceUrl: link,
           image: "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200",
           tags: ["news", feed.source]
-        } satisfies NewsItem;
+        };
       })
-      .filter(Boolean) as NewsItem[];
+      .filter((item): item is NewsItem => item !== null);
 
     return parsed.slice(0, 8);
-  } catch (error) {
-    console.error("Errore feed:", feed.url, error);
+  } catch {
     return [];
   }
 }
@@ -123,16 +96,8 @@ export async function GET() {
   const results = await Promise.all(RSS_FEEDS.map(fetchRSS));
   const items = results.flat();
 
-  if (items.length === 0) {
-    return NextResponse.json({
-      ok: true,
-      items: fallbackNews,
-      debug: "Nessun feed RSS disponibile"
-    });
-  }
-
   return NextResponse.json({
     ok: true,
-    items: items.slice(0, 20)
+    items
   });
 }
