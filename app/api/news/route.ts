@@ -27,188 +27,14 @@ function extractTag(item: string, tag: string): string {
   return match ? stripHtml(match[1]) : "";
 }
 
-function guessCategory(sourceName: string, title: string, description: string): Category {
-  const text = `${sourceName} ${title} ${description}`.toLowerCase();
-
-  if (
-    text.includes("governo") ||
-    text.includes("parlamento") ||
-    text.includes("elezioni") ||
-    text.includes("ministro") ||
-    text.includes("politica") ||
-    text.includes("senato") ||
-    text.includes("camera")
-  ) {
-    return "politica";
-  }
-
-  if (
-    text.includes("borsa") ||
-    text.includes("mercati") ||
-    text.includes("inflazione") ||
-    text.includes("finanza") ||
-    text.includes("economia") ||
-    text.includes("spread") ||
-    text.includes("banche") ||
-    text.includes("pil") ||
-    text.includes("tassi")
-  ) {
-    return "economia";
-  }
-
-  if (
-    text.includes("calcio") ||
-    text.includes("serie a") ||
-    text.includes("serie b") ||
-    text.includes("tennis") ||
-    text.includes("formula 1") ||
-    text.includes("motogp") ||
-    text.includes("champions") ||
-    text.includes("allenatore") ||
-    text.includes("partita") ||
-    text.includes("sport")
-  ) {
-    return "sport";
-  }
-
-  if (
-    text.includes("comune") ||
-    text.includes("provincia") ||
-    text.includes("sindaco") ||
-    text.includes("rimini") ||
-    text.includes("milano") ||
-    text.includes("roma") ||
-    text.includes("bologna") ||
-    text.includes("torino") ||
-    text.includes("napoli") ||
-    text.includes("firenze") ||
-    text.includes("palermo") ||
-    text.includes("territorio") ||
-    text.includes("quartiere") ||
-    text.includes("citta")
-  ) {
-    return "locale";
-  }
-
-  return "cronaca";
-}
-
-function guessCity(title: string, description: string): string {
-  const text = `${title} ${description}`.toLowerCase();
-
-  const cities = [
-    "roma",
-    "milano",
-    "napoli",
-    "torino",
-    "palermo",
-    "genova",
-    "bologna",
-    "firenze",
-    "bari",
-    "catania",
-    "venezia",
-    "verona",
-    "messina",
-    "padova",
-    "trieste",
-    "taranto",
-    "brescia",
-    "prato",
-    "parma",
-    "modena",
-    "reggio emilia",
-    "reggio calabria",
-    "perugia",
-    "livorno",
-    "ravenna",
-    "cagliari",
-    "foggia",
-    "rimini",
-    "salerno",
-    "ferrara",
-    "sassari",
-    "latina",
-    "giugliano",
-    "monza",
-    "siracusa",
-    "pescara",
-    "forli",
-    "trento",
-    "vicenza",
-    "terni",
-    "bolzano",
-    "novara",
-    "piacenza",
-    "ancona",
-    "andria",
-    "arezzo",
-    "udine",
-    "cesena",
-    "lecce",
-    "pesaro",
-    "barletta",
-    "alessandria",
-    "la spezia",
-    "pistoia",
-    "pisa",
-    "catanzaro",
-    "lucca",
-    "brindisi",
-    "treviso",
-    "como",
-    "busto arsizio",
-    "marsala",
-    "grosseto",
-    "asti",
-    "cremona",
-    "matera",
-    "trapani",
-    "viterbo",
-    "caserta",
-    "cosenza",
-    "agrigento",
-    "ragusa",
-    "crotone",
-    "l'aquila",
-    "imperia",
-    "savona",
-    "sanremo",
-    "viareggio",
-    "riccione",
-    "cesenatico",
-    "bellaria",
-    "cervia",
-    "faenza",
-    "imola",
-    "rovigo",
-    "mantova",
-    "siena",
-    "massa",
-    "carrara",
-    "campobasso",
-    "potenza",
-    "avellino",
-    "benevento",
-    "isernia",
-    "vasto",
-    "chieti",
-    "ascoli piceno",
-    "fermo",
-    "macerata",
-    "urbino"
-  ];
-
-  for (const city of cities) {
-    if (text.includes(city)) {
-      return city
-        .split(" ")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
-    }
-  }
-
-  return "Italia";
+function normalizeCityName(city: string): string {
+  return city
+    .split(" ")
+    .map((part) => {
+      if (!part) return part;
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join(" ");
 }
 
 function guessCategory(sourceName: string, title: string, description: string): Category {
@@ -270,10 +96,136 @@ function guessCategory(sourceName: string, title: string, description: string): 
   return "cronaca";
 }
 
-function createId(index: number): number {
-  const timestamp = Date.now().toString();
-  const safeIndex = index.toString().padStart(3, "0");
-  return Number(`${timestamp}${safeIndex}`);
+function guessCity(title: string, description: string): string {
+  const text = `${title} ${description}`.toLowerCase();
+
+  const cities = [
+    "roma",
+    "milano",
+    "napoli",
+    "torino",
+    "palermo",
+    "genova",
+    "bologna",
+    "firenze",
+    "bari",
+    "catania",
+    "venezia",
+    "verona",
+    "messina",
+    "padova",
+    "trieste",
+    "taranto",
+    "brescia",
+    "prato",
+    "parma",
+    "modena",
+    "reggio emilia",
+    "reggio calabria",
+    "perugia",
+    "livorno",
+    "ravenna",
+    "cagliari",
+    "foggia",
+    "rimini",
+    "salerno",
+    "ferrara",
+    "sassari",
+    "latina",
+    "monza",
+    "siracusa",
+    "pescara",
+    "forli",
+    "trento",
+    "vicenza",
+    "terni",
+    "bolzano",
+    "novara",
+    "piacenza",
+    "ancona",
+    "arezzo",
+    "udine",
+    "cesena",
+    "lecce",
+    "pesaro",
+    "alessandria",
+    "la spezia",
+    "pistoia",
+    "pisa",
+    "catanzaro",
+    "lucca",
+    "brindisi",
+    "treviso",
+    "como",
+    "grosseto",
+    "asti",
+    "cremona",
+    "matera",
+    "trapani",
+    "viterbo",
+    "caserta",
+    "cosenza",
+    "agrigento",
+    "ragusa",
+    "crotone",
+    "imperia",
+    "savona",
+    "sanremo",
+    "viareggio",
+    "riccione",
+    "cesenatico",
+    "bellaria",
+    "cervia",
+    "faenza",
+    "imola",
+    "rovigo",
+    "mantova",
+    "siena",
+    "massa",
+    "carrara",
+    "campobasso",
+    "potenza",
+    "avellino",
+    "benevento",
+    "isernia",
+    "vasto",
+    "chieti",
+    "ascoli piceno",
+    "fermo",
+    "macerata",
+    "urbino"
+  ];
+
+  for (const city of cities) {
+    if (text.includes(city)) {
+      return normalizeCityName(city);
+    }
+  }
+
+  return "Italia";
+}
+
+function getCategoryImage(category: Category): string {
+  switch (category) {
+    case "politica":
+      return "https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1200";
+    case "economia":
+      return "https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg?auto=compress&cs=tinysrgb&w=1200";
+    case "sport":
+      return "https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=1200";
+    case "locale":
+      return "https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg?auto=compress&cs=tinysrgb&w=1200";
+    default:
+      return "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200";
+  }
+}
+
+function createId(source: string, index: number): number {
+  const sourceValue = source
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  return Number(`${sourceValue}${Date.now()}${index}`);
 }
 
 async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem[]> {
@@ -291,7 +243,7 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
 
     const xml = await response.text();
 
-    if (!xml.includes("<item")) {
+    if (!xml || !xml.includes("<item")) {
       return [];
     }
 
@@ -314,7 +266,7 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
         const city = guessCity(title, description);
 
         return {
-          id: createId(index),
+          id: createId(feed.source, index),
           title,
           summary: description ? description.slice(0, 220) : "Riassunto non disponibile",
           category,
