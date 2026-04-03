@@ -1,30 +1,6 @@
 import NewsClient from "@/components/NewsClient";
-import type { NewsItem } from "@/lib/types";
 
-async function getNews(): Promise<NewsItem[]> {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-
-  try {
-    const response = await fetch(`${baseUrl}/api/news`, {
-      cache: "no-store"
-    });
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-    return data.items || [];
-  } catch {
-    return [];
-  }
-}
-
-export default async function HomePage() {
-  const items = await getNews();
-
+export default function HomePage() {
   return (
     <main className="shell">
       <header className="topbar">
@@ -43,12 +19,12 @@ export default async function HomePage() {
         <p className="eyebrow">Notizie reali</p>
         <h2>Feed aggiornato da fonti esterne</h2>
         <p>
-          La homepage legge le notizie dall&apos;API interna e mostra titoli, riassunti,
+          La homepage carica le notizie dall&apos;API interna e mostra titoli, riassunti,
           categorie e link alla fonte.
         </p>
       </section>
 
-      <NewsClient items={items} />
+      <NewsClient />
 
       <p className="note">
         Nota: i contenuti arrivano dall&apos;endpoint API del progetto.
