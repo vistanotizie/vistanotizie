@@ -31,7 +31,7 @@ function guessCategory(sourceName: string, title: string): Category {
   if (text.includes("sport")) return "sport";
   if (text.includes("borsa") || text.includes("economia") || text.includes("finanza")) return "economia";
   if (text.includes("governo") || text.includes("parlamento") || text.includes("politica")) return "politica";
-  if (text.includes("locale") || text.includes("comune") || text.includes("città")) return "locale";
+  if (text.includes("locale") || text.includes("comune") || text.includes("citta")) return "locale";
   return "cronaca";
 }
 
@@ -58,6 +58,7 @@ async function fetchRSS(url: string): Promise<NewsItem[]> {
       const pubDate = stripHtml(extractTag(item, "pubDate"));
 
       let sourceName = "Fonte RSS";
+
       try {
         sourceName = new URL(link).hostname.replace("www.", "");
       } catch {}
