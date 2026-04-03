@@ -4,15 +4,39 @@ import type { Category, NewsItem } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const RSS_FEEDS = [
-  "https://www.ansa.it/sito/ansait_rss.xml",
-  "https://www.repubblica.it/rss/homepage/rss2.0.xml",
-  "https://www.ilsole24ore.com/rss/italia.xml"
+  {
+    url: "https://www.ansa.it/sito/ansait_rss.xml",
+    source: "ANSA"
+  },
+  {
+    url: "https://www.repubblica.it/rss/homepage/rss2.0.xml",
+    source: "la Repubblica"
+  },
+  {
+    url: "https://www.ilsole24ore.com/rss/italia.xml",
+    source: "Il Sole 24 Ore"
+  }
 ];
 
-function stripHtml(html: string) {
-  return html
-    .replace(/<!\\[CDATA\\[(.*?)\\]\\]>/g, "$1")
-    .replace(/<[^>]*>/g, "")
+const fallbackNews: NewsItem[] = [
+  {
+    id: 1001,
+    title: "Feed temporaneamente non disponibile",
+    summary: "Questa notizia di fallback appare quando i feed esterni non rispondono correttamente dal server.",
+    category: "cronaca",
+    city: "Italia",
+    date: new Date().toLocaleString("it-IT"),
+    sourceName: "VistaNotizie",
+    sourceUrl: "https://vistanotizie.it",
+    image: "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    tags: ["fallback", "feed"]
+  }
+];
+
+function stripHtml(value: string) {
+  return value
+    .replace(/<!\\[CDATA\\[(.*?)\\]\\]>/gis, "$1")
+    .replace(/<[^>]+>/g, "")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
@@ -21,8 +45,9 @@ function stripHtml(html: string) {
 }
 
 function extractTag(item: string, tag: string) {
-  const match = item.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i"));
-  return match ? match[1].trim() : "";
+  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const match = item.match(regex);
+  return match ? stripHtml(match[1]) : "";
 }
 
 function guessCategory(sourceName: string, title: string): Category {
@@ -31,62 +56,83 @@ function guessCategory(sourceName: string, title: string): Category {
   if (text.includes("sport")) return "sport";
   if (text.includes("borsa") || text.includes("economia") || text.includes("finanza")) return "economia";
   if (text.includes("governo") || text.includes("parlamento") || text.includes("politica")) return "politica";
-  if (text.includes("locale") || text.includes("comune") || text.includes("citta")) return "locale";
+  if (text.includes("comune") || text.includes("citta") || text.includes("territorio")) return "locale";
+
   return "cronaca";
 }
 
-async function fetchRSS(url: string): Promise<NewsItem[]> {
+async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem[]> {
   try {
-    const res = await fetch(url, {
+    const response = await fetch(feed.url, {
+      cache: "no-store",
       headers: {
         "user-agent": "Mozilla/5.0 VistaNotizie"
-      },
-      cache: "no-store"
+      }
     });
 
-    if (!res.ok) {
+    if (!response.ok) {
+      console.error("RSS non raggiungibile:", feed.url, response.status);
       return [];
     }
 
-    const text = await res.text();
-    const items = text.split("<item>").slice(1);
+    const xml = await response.text();
 
-    return items.slice(0, 10).map((item, index) => {
-      const title = stripHtml(extractTag(item, "title"));
-      const link = stripHtml(extractTag(item, "link"));
-      const description = stripHtml(extractTag(item, "description"));
-      const pubDate = stripHtml(extractTag(item, "pubDate"));
+    if (!xml || !xml.includes("<item")) {
+      console.error("RSS senza item validi:", feed.url);
+      return [];
+    }
 
-      let sourceName = "Fonte RSS";
+    const rawItems = xml.split(/<item[ >]/i).slice(1);
 
-      try {
-        sourceName = new URL(link).hostname.replace("www.", "");
-      } catch {}
+    const parsed = rawItems
+      .map((raw, index) => {
+        const normalized = "<item " + raw;
 
-      return {
-        id: Number(`${Date.now()}${index}`),
-        title: title || "Titolo non disponibile",
-        summary: description.slice(0, 220) || "Riassunto non disponibile",
-        category: guessCategory(sourceName, title),
-        city: "Italia",
-        date: pubDate || new Date().toLocaleString("it-IT"),
-        sourceName,
-        sourceUrl: link || url,
-        image: "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        tags: ["news", sourceName]
-      };
-    });
-  } catch {
+        const title = extractTag(normalized, "title");
+        const link = extractTag(normalized, "link");
+        const description = extractTag(normalized, "description");
+        const pubDate = extractTag(normalized, "pubDate");
+
+        if (!title || !link) {
+          return null;
+        }
+
+        return {
+          id: Number(`${Date.now()}${index}`),
+          title,
+          summary: description ? description.slice(0, 220) : "Riassunto non disponibile",
+          category: guessCategory(feed.source, title),
+          city: "Italia",
+          date: pubDate || new Date().toLocaleString("it-IT"),
+          sourceName: feed.source,
+          sourceUrl: link,
+          image: "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200",
+          tags: ["news", feed.source]
+        } satisfies NewsItem;
+      })
+      .filter(Boolean) as NewsItem[];
+
+    return parsed.slice(0, 8);
+  } catch (error) {
+    console.error("Errore feed:", feed.url, error);
     return [];
   }
 }
 
 export async function GET() {
   const results = await Promise.all(RSS_FEEDS.map(fetchRSS));
-  const allNews = results.flat().slice(0, 20);
+  const items = results.flat();
+
+  if (items.length === 0) {
+    return NextResponse.json({
+      ok: true,
+      items: fallbackNews,
+      debug: "Nessun feed RSS disponibile"
+    });
+  }
 
   return NextResponse.json({
     ok: true,
-    items: allNews
+    items: items.slice(0, 20)
   });
 }
