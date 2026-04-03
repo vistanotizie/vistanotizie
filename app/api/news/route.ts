@@ -96,31 +96,178 @@ function guessCategory(sourceName: string, title: string, description: string): 
 function guessCity(title: string, description: string): string {
   const text = `${title} ${description}`.toLowerCase();
 
-  if (text.includes("rimini")) return "Rimini";
-  if (text.includes("milano")) return "Milano";
-  if (text.includes("roma")) return "Roma";
-  if (text.includes("bologna")) return "Bologna";
-  if (text.includes("torino")) return "Torino";
-  if (text.includes("napoli")) return "Napoli";
-  if (text.includes("firenze")) return "Firenze";
-  if (text.includes("palermo")) return "Palermo";
+  const cities = [
+    "roma",
+    "milano",
+    "napoli",
+    "torino",
+    "palermo",
+    "genova",
+    "bologna",
+    "firenze",
+    "bari",
+    "catania",
+    "venezia",
+    "verona",
+    "messina",
+    "padova",
+    "trieste",
+    "taranto",
+    "brescia",
+    "prato",
+    "parma",
+    "modena",
+    "reggio emilia",
+    "reggio calabria",
+    "perugia",
+    "livorno",
+    "ravenna",
+    "cagliari",
+    "foggia",
+    "rimini",
+    "salerno",
+    "ferrara",
+    "sassari",
+    "latina",
+    "giugliano",
+    "monza",
+    "siracusa",
+    "pescara",
+    "forli",
+    "trento",
+    "vicenza",
+    "terni",
+    "bolzano",
+    "novara",
+    "piacenza",
+    "ancona",
+    "andria",
+    "arezzo",
+    "udine",
+    "cesena",
+    "lecce",
+    "pesaro",
+    "barletta",
+    "alessandria",
+    "la spezia",
+    "pistoia",
+    "pisa",
+    "catanzaro",
+    "lucca",
+    "brindisi",
+    "treviso",
+    "como",
+    "busto arsizio",
+    "marsala",
+    "grosseto",
+    "asti",
+    "cremona",
+    "matera",
+    "trapani",
+    "viterbo",
+    "caserta",
+    "cosenza",
+    "agrigento",
+    "ragusa",
+    "crotone",
+    "l'aquila",
+    "imperia",
+    "savona",
+    "sanremo",
+    "viareggio",
+    "riccione",
+    "cesenatico",
+    "bellaria",
+    "cervia",
+    "faenza",
+    "imola",
+    "rovigo",
+    "mantova",
+    "siena",
+    "massa",
+    "carrara",
+    "campobasso",
+    "potenza",
+    "avellino",
+    "benevento",
+    "isernia",
+    "vasto",
+    "chieti",
+    "ascoli piceno",
+    "fermo",
+    "macerata",
+    "urbino"
+  ];
+
+  for (const city of cities) {
+    if (text.includes(city)) {
+      return city
+        .split(" ")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+    }
+  }
 
   return "Italia";
 }
 
-function getCategoryImage(category: Category): string {
-  switch (category) {
-    case "politica":
-      return "https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    case "economia":
-      return "https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    case "sport":
-      return "https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    case "locale":
-      return "https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    default:
-      return "https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=1200";
+function guessCategory(sourceName: string, title: string, description: string): Category {
+  const text = `${sourceName} ${title} ${description}`.toLowerCase();
+
+  if (
+    text.includes("governo") ||
+    text.includes("parlamento") ||
+    text.includes("elezioni") ||
+    text.includes("ministro") ||
+    text.includes("politica") ||
+    text.includes("senato") ||
+    text.includes("camera")
+  ) {
+    return "politica";
   }
+
+  if (
+    text.includes("borsa") ||
+    text.includes("mercati") ||
+    text.includes("inflazione") ||
+    text.includes("finanza") ||
+    text.includes("economia") ||
+    text.includes("spread") ||
+    text.includes("banche") ||
+    text.includes("pil") ||
+    text.includes("tassi")
+  ) {
+    return "economia";
+  }
+
+  if (
+    text.includes("calcio") ||
+    text.includes("serie a") ||
+    text.includes("serie b") ||
+    text.includes("tennis") ||
+    text.includes("formula 1") ||
+    text.includes("motogp") ||
+    text.includes("champions") ||
+    text.includes("allenatore") ||
+    text.includes("partita") ||
+    text.includes("sport")
+  ) {
+    return "sport";
+  }
+
+  if (
+    text.includes("comune") ||
+    text.includes("provincia") ||
+    text.includes("sindaco") ||
+    text.includes("quartiere") ||
+    text.includes("territorio") ||
+    text.includes("municipio") ||
+    text.includes("consiglio comunale")
+  ) {
+    return "locale";
+  }
+
+  return "cronaca";
 }
 
 function createId(index: number): number {
