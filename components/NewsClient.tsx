@@ -41,8 +41,9 @@ export default function NewsClient() {
       .map((item) => item.city?.trim())
       .filter((value): value is string => Boolean(value) && value.length > 0);
 
-    const uniqueCities = Array.from(new Set(values))
-      .sort((a, b) => a.localeCompare(b, "it"));
+    const uniqueCities = Array.from(new Set(values)).sort((a, b) =>
+      a.localeCompare(b, "it")
+    );
 
     if (!uniqueCities.includes("Italia")) {
       uniqueCities.unshift("Italia");
@@ -62,9 +63,15 @@ export default function NewsClient() {
 
     return items.filter((item) => {
       const categoryOk = category === "tutte" || item.category === category;
-      const cityOk = city === "Italia" || item.city === city;
+
+      const cityOk =
+        city === "Italia" ||
+        item.category !== "locale" ||
+        item.city === city;
+
       const haystack = `${item.title} ${item.summary} ${item.city} ${item.tags.join(" ")}`.toLowerCase();
       const searchOk = haystack.includes(q);
+
       return categoryOk && cityOk && searchOk;
     });
   }, [items, search, city, category]);
@@ -94,7 +101,12 @@ export default function NewsClient() {
 
         <div className="box">
           <span>🧭</span>
-          <select value={category} onChange={(e) => setCategory(e.target.value as "tutte" | Category)}>
+          <select
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value as "tutte" | Category)
+            }
+          >
             {categories.map((entry) => (
               <option key={entry.value} value={entry.value}>
                 {entry.label}
@@ -124,40 +136,46 @@ export default function NewsClient() {
       </div>
 
       <section className="grid">
-        {!loading && filtered.map((item) => (
-          <article key={item.id} className="card">
-            <div className="media">
-              <img src={item.image} alt={item.title} />
-              <span className="badge">{item.category}</span>
-            </div>
-
-            <div className="body">
-              <div className="smallrow">
-                <span>{item.city}</span>
-                <span>•</span>
-                <span>{item.date}</span>
+        {!loading &&
+          filtered.map((item) => (
+            <article key={item.id} className="card">
+              <div className="media">
+                <img src={item.image} alt={item.title} />
+                <span className="badge">{item.category}</span>
               </div>
 
-              <h3 className="title">{item.title}</h3>
-              <p className="summary">{item.summary}</p>
+              <div className="body">
+                <div className="smallrow">
+                  <span>{item.city}</span>
+                  <span>•</span>
+                  <span>{item.date}</span>
+                </div>
 
-              <div className="tags">
-                {item.tags.map((tag) => (
-                  <span key={tag} className="tag">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+                <h3 className="title">{item.title}</h3>
+                <p className="summary">{item.summary}</p>
 
-              <div className="bottom">
-                <small className="source">Fonte: {item.sourceName}</small>
-                <a className="link" href={item.sourceUrl} target="_blank" rel="noreferrer">
-                  Apri fonte
-                </a>
+                <div className="tags">
+                  {item.tags.map((tag) => (
+                    <span key={tag} className="tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="bottom">
+                  <small className="source">Fonte: {item.sourceName}</small>
+                  <a
+                    className="link"
+                    href={item.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Apri fonte
+                  </a>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
       </section>
     </>
   );
