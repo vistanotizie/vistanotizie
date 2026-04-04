@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import type { Category, NewsItem } from "@/lib/types";
+import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const RSS_FEEDS = [
+type FeedSource = {
+  url: string;
+  source: string;
+};
+
+type NewsItemWithSlug = NewsItem & {
+  slug: string;
+};
+
+const RSS_FEEDS: FeedSource[] = [
   { url: "https://www.ansa.it/sito/ansait_rss.xml", source: "ANSA" },
   { url: "https://www.repubblica.it/rss/homepage/rss2.0.xml", source: "la Repubblica" },
   { url: "https://www.ilsole24ore.com/rss/italia.xml", source: "Il Sole 24 Ore" }
@@ -30,10 +40,7 @@ function extractTag(item: string, tag: string): string {
 function normalizeCityName(city: string): string {
   return city
     .split(" ")
-    .map((part) => {
-      if (!part) return part;
-      return part.charAt(0).toUpperCase() + part.slice(1);
-    })
+    .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1) : part))
     .join(" ");
 }
 
@@ -100,100 +107,19 @@ function guessCity(title: string, description: string): string {
   const text = `${title} ${description}`.toLowerCase();
 
   const cities = [
-    "roma",
-    "milano",
-    "napoli",
-    "torino",
-    "palermo",
-    "genova",
-    "bologna",
-    "firenze",
-    "bari",
-    "catania",
-    "venezia",
-    "verona",
-    "messina",
-    "padova",
-    "trieste",
-    "taranto",
-    "brescia",
-    "prato",
-    "parma",
-    "modena",
-    "reggio emilia",
-    "reggio calabria",
-    "perugia",
-    "livorno",
-    "ravenna",
-    "cagliari",
-    "foggia",
-    "rimini",
-    "salerno",
-    "ferrara",
-    "sassari",
-    "latina",
-    "monza",
-    "siracusa",
-    "pescara",
-    "forli",
-    "trento",
-    "vicenza",
-    "terni",
-    "bolzano",
-    "novara",
-    "piacenza",
-    "ancona",
-    "arezzo",
-    "udine",
-    "cesena",
-    "lecce",
-    "pesaro",
-    "alessandria",
-    "la spezia",
-    "pistoia",
-    "pisa",
-    "catanzaro",
-    "lucca",
-    "brindisi",
-    "treviso",
-    "como",
-    "grosseto",
-    "asti",
-    "cremona",
-    "matera",
-    "trapani",
-    "viterbo",
-    "caserta",
-    "cosenza",
-    "agrigento",
-    "ragusa",
-    "crotone",
-    "imperia",
-    "savona",
-    "sanremo",
-    "viareggio",
-    "riccione",
-    "cesenatico",
-    "bellaria",
-    "cervia",
-    "faenza",
-    "imola",
-    "rovigo",
-    "mantova",
-    "siena",
-    "massa",
-    "carrara",
-    "campobasso",
-    "potenza",
-    "avellino",
-    "benevento",
-    "isernia",
-    "vasto",
-    "chieti",
-    "ascoli piceno",
-    "fermo",
-    "macerata",
-    "urbino"
+    "roma", "milano", "napoli", "torino", "palermo", "genova", "bologna", "firenze",
+    "bari", "catania", "venezia", "verona", "messina", "padova", "trieste", "taranto",
+    "brescia", "prato", "parma", "modena", "reggio emilia", "reggio calabria", "perugia",
+    "livorno", "ravenna", "cagliari", "foggia", "rimini", "salerno", "ferrara", "sassari",
+    "latina", "monza", "siracusa", "pescara", "forli", "trento", "vicenza", "terni",
+    "bolzano", "novara", "piacenza", "ancona", "arezzo", "udine", "cesena", "lecce",
+    "pesaro", "alessandria", "la spezia", "pistoia", "pisa", "catanzaro", "lucca",
+    "brindisi", "treviso", "como", "grosseto", "asti", "cremona", "matera", "trapani",
+    "viterbo", "caserta", "cosenza", "agrigento", "ragusa", "crotone", "imperia",
+    "savona", "sanremo", "viareggio", "riccione", "cesenatico", "bellaria", "cervia",
+    "faenza", "imola", "rovigo", "mantova", "siena", "massa", "carrara", "campobasso",
+    "potenza", "avellino", "benevento", "isernia", "vasto", "chieti", "ascoli piceno",
+    "fermo", "macerata", "urbino"
   ];
 
   for (const city of cities) {
@@ -228,7 +154,7 @@ function createId(source: string, index: number): number {
   return Number(`${sourceValue}${Date.now()}${index}`);
 }
 
-async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem[]> {
+async function fetchRSS(feed: FeedSource): Promise<NewsItemWithSlug[]> {
   try {
     const response = await fetch(feed.url, {
       cache: "no-store",
@@ -249,7 +175,7 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
 
     const rawItems = xml.split(/<item[ >]/i).slice(1);
 
-    const parsed: NewsItem[] = rawItems
+    const parsed: NewsItemWithSlug[] = rawItems
       .map((raw, index) => {
         const normalized = "<item " + raw;
 
@@ -264,9 +190,11 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
 
         const category = guessCategory(feed.source, title, description);
         const city = guessCity(title, description);
+        const id = createId(feed.source, index);
 
         return {
-          id: createId(feed.source, index),
+          id,
+          slug: `${slugify(title)}-${id}`,
           title,
           summary: description ? description.slice(0, 220) : "Riassunto non disponibile",
           category,
@@ -278,7 +206,7 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
           tags: [feed.source, category, city]
         };
       })
-      .filter((item): item is NewsItem => item !== null);
+      .filter((item): item is NewsItemWithSlug => item !== null);
 
     return parsed.slice(0, 8);
   } catch {
@@ -286,7 +214,7 @@ async function fetchRSS(feed: { url: string; source: string }): Promise<NewsItem
   }
 }
 
-function deduplicateNews(items: NewsItem[]): NewsItem[] {
+function deduplicateNews(items: NewsItemWithSlug[]): NewsItemWithSlug[] {
   const seen = new Set<string>();
 
   return items.filter((item) => {
