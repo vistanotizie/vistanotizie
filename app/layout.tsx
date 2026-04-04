@@ -3,7 +3,15 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "VistaNotizie",
-  description: "Le notizie del momento, spiegate bene e divise per categoria e città."
+  description: "Notizie aggiornate, ordinate per argomento e citta.",
+  icons: {
+    icon: "/icon.svg"
+  },
+  openGraph: {
+    title: "VistaNotizie",
+    description: "Notizie aggiornate, ordinate per argomento e citta.",
+    type: "website"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
