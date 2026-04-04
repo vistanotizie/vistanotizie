@@ -1,7 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Category, NewsItem } from "@/lib/types";
+
+type NewsItemWithSlug = NewsItem & {
+  slug?: string;
+};
 
 const categories: Array<{ value: "tutte" | Category; label: string }> = [
   { value: "tutte", label: "Tutte" },
@@ -13,7 +18,7 @@ const categories: Array<{ value: "tutte" | Category; label: string }> = [
 ];
 
 export default function NewsClient() {
-  const [items, setItems] = useState<NewsItem[]>([]);
+  const [items, setItems] = useState<NewsItemWithSlug[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("Italia");
@@ -41,8 +46,9 @@ export default function NewsClient() {
       .map((item) => item.city?.trim())
       .filter((value): value is string => Boolean(value) && value.length > 0);
 
-    const uniqueCities = Array.from(new Set(values))
-      .sort((a, b) => a.localeCompare(b, "it"));
+    const uniqueCities = Array.from(new Set(values)).sort((a, b) =>
+      a.localeCompare(b, "it")
+    );
 
     if (!uniqueCities.includes("Italia")) {
       uniqueCities.unshift("Italia");
@@ -77,7 +83,7 @@ export default function NewsClient() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cerca notizie, città o tag..."
+            placeholder="Cerca notizie, citta o tag..."
           />
         </div>
 
@@ -94,7 +100,10 @@ export default function NewsClient() {
 
         <div className="box">
           <span>🧭</span>
-          <select value={category} onChange={(e) => setCategory(e.target.value as "tutte" | Category)}>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as "tutte" | Category)}
+          >
             {categories.map((entry) => (
               <option key={entry.value} value={entry.value}>
                 {entry.label}
@@ -117,47 +126,52 @@ export default function NewsClient() {
       </div>
 
       <div className="meta">
-        <span>
-          {loading ? "Caricamento notizie..." : `${filtered.length} notizie visibili`}
-        </span>
-        <span>Città selezionata: {city}</span>
+        <span>{loading ? "Caricamento notizie..." : `${filtered.length} notizie visibili`}</span>
+        <span>Citta selezionata: {city}</span>
       </div>
 
       <section className="grid">
-        {!loading && filtered.map((item) => (
-          <article key={item.id} className="card">
-            <div className="media">
-              <img src={item.image} alt={item.title} />
-              <span className="badge">{item.category}</span>
-            </div>
+        {!loading &&
+          filtered.map((item) => {
+            const href = item.slug ? `/notizia/${item.slug}` : item.sourceUrl;
 
-            <div className="body">
-              <div className="smallrow">
-                <span>{item.city}</span>
-                <span>•</span>
-                <span>{item.date}</span>
-              </div>
+            return (
+              <article key={item.id} className="card">
+                <Link href={href} className="cardLinkWrap">
+                  <div className="media">
+                    <img src={item.image} alt={item.title} />
+                    <span className="badge">{item.category}</span>
+                  </div>
 
-              <h3 className="title">{item.title}</h3>
-              <p className="summary">{item.summary}</p>
+                  <div className="body">
+                    <div className="smallrow">
+                      <span>{item.city}</span>
+                      <span>•</span>
+                      <span>{item.date}</span>
+                    </div>
 
-              <div className="tags">
-                {item.tags.map((tag) => (
-                  <span key={tag} className="tag">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+                    <h3 className="title">{item.title}</h3>
+                    <p className="summary">{item.summary}</p>
 
-              <div className="bottom">
-                <small className="source">Fonte: {item.sourceName}</small>
-                <a className="link" href={item.sourceUrl} target="_blank" rel="noreferrer">
-                  Apri fonte
-                </a>
-              </div>
-            </div>
-          </article>
-        ))}
+                    <div className="tags">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+
+                <div className="bottom">
+                  <small className="source">Fonte: {item.sourceName}</small>
+                  <a className="link" href={item.sourceUrl} target="_blank" rel="noreferrer">
+                    Apri fonte
+                  </a>
+                </div>
+              </article>
+            );
+          })}
       </section>
     </>
   );
