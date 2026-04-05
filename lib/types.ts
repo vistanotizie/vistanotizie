@@ -1,14 +1,13 @@
-export type Category = "politica" | "cronaca" | "sport" | "economia" | "locale";
+export type NewsCategory = 'top' | 'tech' | 'business' | 'world';
 
-export type NewsItem = {
-  id: number;
+export interface Article {
+  id: string;
   title: string;
-  summary: string;
-  category: Category;
-  city: string;
-  date: string;
-  sourceName: string;
-  sourceUrl: string;
+  link: string;
+  source: string;
+  category: NewsCategory;
+  publishedAt: string;
   image: string;
-  tags: string[];
-};
+  excerpt: string;
+  content: string;
+}

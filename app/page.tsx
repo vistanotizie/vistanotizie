@@ -1,108 +1,71 @@
-import NewsClient from "@/components/NewsClient";
+import { Header } from '@/components/Header';
+import { NewsGrid } from '@/components/NewsGrid';
+import { getNews, getCategoryLabel } from '@/lib/utils';
 
-export default function HomePage() {
+const categories = [
+  { key: 'top', title: 'In evidenza' },
+  { key: 'tech', title: 'Tecnologia' },
+  { key: 'business', title: 'Economia' },
+  { key: 'world', title: 'Mondo' },
+] as const;
+
+export default async function HomePage() {
+  const [top, tech, business, world] = await Promise.all([
+    getNews('top'),
+    getNews('tech'),
+    getNews('business'),
+    getNews('world'),
+  ]);
+
+  const sections = [top, tech, business, world];
+  const featured = top.slice(0, 6);
+
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="logo">V</div>
-          <div>
-            <h1>VistaNotizie</h1>
-            <p>Notizie aggiornate, ordinate per argomento e citta</p>
-          </div>
-        </div>
+    <main className="container">
+      <Header />
 
-        <div className="topbarActions">
-          <a href="/api/news" className="chip secondaryChip">
-            API news
-          </a>
-        </div>
-      </header>
-
-      <section className="hero heroGrid">
-        <div className="heroMain">
-          <p className="eyebrow">VistaNotizie</p>
-          <h2>Le notizie del momento, in una pagina piu chiara e piu leggibile</h2>
-          <p className="heroLead">
-            VistaNotizie raccoglie notizie aggiornate da fonti esterne, le organizza
-            per categoria e ti permette di filtrare rapidamente i contenuti per citta
-            e argomento.
-          </p>
-
-          <div className="heroCtas">
-            <a href="#news-section" className="primaryButton">
-              Vai alle notizie
-            </a>
-            <a href="/api/news" className="ghostButton">
-              Apri feed JSON
-            </a>
-          </div>
-        </div>
-
-        <div className="heroSide">
-          <div className="miniStatCard">
-            <span className="miniStatLabel">Aggiornamento</span>
-            <strong>Feed live da RSS</strong>
-            <p>Le notizie arrivano dall&apos;API interna del progetto.</p>
-          </div>
-
-          <div className="miniStatCard">
-            <span className="miniStatLabel">Focus</span>
-            <strong>Mobile + Desktop</strong>
-            <p>Layout studiato per consultazione rapida anche da iPhone.</p>
-          </div>
-
-          <div className="miniStatCard">
-            <span className="miniStatLabel">Prossimo step</span>
-            <strong>AI + riassunti migliori</strong>
-            <p>Classificazione e sintesi possono essere migliorate ulteriormente.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="infoStrip">
-        <div className="infoCard">
-          <span className="infoTitle">Categorie</span>
-          <span className="infoText">Politica, cronaca, sport, economia, locale</span>
-        </div>
-        <div className="infoCard">
-          <span className="infoTitle">Filtro</span>
-          <span className="infoText">Ricerca testuale e selezione citta</span>
-        </div>
-        <div className="infoCard">
-          <span className="infoTitle">Fonti</span>
-          <span className="infoText">Link diretto sempre visibile in fondo card</span>
-        </div>
-      </section>
-
-      <section id="news-section" className="newsSection">
-        <div className="sectionHeading">
-          <div>
-            <p className="sectionEyebrow">Homepage</p>
-            <h3>Ultime notizie</h3>
-          </div>
-          <p className="sectionDescription">
-            Filtra il flusso per categoria, citta o parole chiave.
-          </p>
-        </div>
-
-        <NewsClient />
-      </section>
-
-      <footer className="siteFooter">
+      <section className="hero">
         <div>
-          <strong>VistaNotizie</strong>
+          <span className="hero-badge">Next.js + Vercel</span>
+          <h1>Il tuo sito news moderno, già pronto per la pubblicazione.</h1>
           <p>
-            Progetto in evoluzione. Le notizie mostrano sempre il collegamento alla
-            fonte originale.
+            VistaNotizie aggrega feed RSS reali, mostra immagini dinamiche, apre una pagina dettaglio per ogni
+            articolo e genera un riassunto AI direttamente dal server.
           </p>
         </div>
-
-        <div className="footerLinks">
-          <a href="/api/news">Feed JSON</a>
-          <a href="#news-section">Torna alle notizie</a>
+        <div className="hero-panel">
+          <div>
+            <strong>{featured.length}</strong>
+            <span>notizie in primo piano</span>
+          </div>
+          <div>
+            <strong>4</strong>
+            <span>sezioni tematiche</span>
+          </div>
+          <div>
+            <strong>AI</strong>
+            <span>riassunti on demand</span>
+          </div>
         </div>
-      </footer>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>Prime notizie</h2>
+          <p>Le più recenti da fonti RSS reali.</p>
+        </div>
+        <NewsGrid articles={featured} />
+      </section>
+
+      {sections.map((articles, index) => (
+        <section className="section-block" key={categories[index].key}>
+          <div className="section-heading">
+            <h2>{getCategoryLabel(categories[index].key)}</h2>
+            <p>Aggiornamento automatico con revalidazione server-side.</p>
+          </div>
+          <NewsGrid articles={articles.slice(0, 6)} />
+        </section>
+      ))}
     </main>
   );
 }
