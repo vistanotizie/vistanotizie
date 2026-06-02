@@ -4,20 +4,42 @@ import { getNews, getCategoryLabel } from '@/lib/utils';
 
 const categories = [
   { key: 'top', title: 'In evidenza' },
-  { key: 'tech', title: 'Tecnologia' },
-  { key: 'business', title: 'Economia' },
-  { key: 'world', title: 'Mondo' },
+  { key: 'politica', title: 'Politica' },
+  { key: 'cronaca', title: 'Cronaca' },
+  { key: 'economia', title: 'Economia' },
+  { key: 'sport', title: 'Sport' },
+  { key: 'tecnologia', title: 'Tecnologia' },
+  { key: 'mondo', title: 'Mondo' },
 ] as const;
 
 export default async function HomePage() {
-  const [top, tech, business, world] = await Promise.all([
-    getNews('top'),
-    getNews('tech'),
-    getNews('business'),
-    getNews('world'),
-  ]);
+const [
+  top,
+  politica,
+  cronaca,
+  economia,
+  sport,
+  tecnologia,
+  mondo,
+] = await Promise.all([
+  getNews('top'),
+  getNews('politica'),
+  getNews('cronaca'),
+  getNews('economia'),
+  getNews('sport'),
+  getNews('tecnologia'),
+  getNews('mondo'),
+]);
 
-  const sections = [top, tech, business, world];
+const sections = [
+  top,
+  politica,
+  cronaca,
+  economia,
+  sport,
+  tecnologia,
+  mondo,
+];
   const featured = top.slice(0, 6);
 
   return (
