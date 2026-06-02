@@ -82,7 +82,11 @@ const sections = [
       </section>
 
       {sections.map((articles, index) => (
-        <section className="section-block" key={categories[index].key}>
+        <section
+          id={categories[index].key}
+          className="section-block"
+          key={categories[index].key}
+        >
           <div className="section-heading">
             <h2>{getCategoryLabel(categories[index].key)}</h2>
             <p>Le ultime notizie della categoria.</p>
