@@ -13,19 +13,34 @@ export const FEEDS: FeedConfig[] = [
     category: 'top',
   },
   {
-    url: 'https://news.google.com/rss/search?q=tecnologia&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Tecnologia',
-    category: 'tech',
+    url: 'https://news.google.com/rss/search?q=politica&hl=it&gl=IT&ceid=IT:it',
+    source: 'Google News · Politica',
+    category: 'politica',
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=cronaca&hl=it&gl=IT&ceid=IT:it',
+    source: 'Google News · Cronaca',
+    category: 'cronaca',
   },
   {
     url: 'https://news.google.com/rss/search?q=economia&hl=it&gl=IT&ceid=IT:it',
     source: 'Google News · Economia',
-    category: 'business',
+    category: 'economia',
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=sport&hl=it&gl=IT&ceid=IT:it',
+    source: 'Google News · Sport',
+    category: 'sport',
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=tecnologia&hl=it&gl=IT&ceid=IT:it',
+    source: 'Google News · Tecnologia',
+    category: 'tecnologia',
   },
   {
     url: 'https://news.google.com/rss/search?q=mondo&hl=it&gl=IT&ceid=IT:it',
     source: 'Google News · Mondo',
-    category: 'world',
+    category: 'mondo',
   },
   {
     url: 'https://www.ansa.it/sito/ansait_rss.xml',
