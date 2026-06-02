@@ -45,8 +45,8 @@ export default async function HomePage() {
             <span>aggiornamento continuo</span>
           </div>
           <div>
-            <strong>AI</strong>
-            <span>riassunti on demand</span>
+            <strong>Fonti</strong>
+            <span>selezionate e aggiornate</span>
           </div>
         </div>
       </section>
@@ -63,7 +63,7 @@ export default async function HomePage() {
         <section className="section-block" key={categories[index].key}>
           <div className="section-heading">
             <h2>{getCategoryLabel(categories[index].key)}</h2>
-            <p>Aggiornamento automatico con revalidazione server-side.</p>
+            <p>Le ultime notizie della categoria.</p>
           </div>
           <NewsGrid articles={articles.slice(0, 6)} />
         </section>
