@@ -168,9 +168,12 @@ export function formatDate(date: string): string {
 export function getCategoryLabel(category: NewsCategory): string {
   return {
     top: 'In evidenza',
-    tech: 'Tecnologia',
-    business: 'Economia',
-    world: 'Mondo',
+    politica: 'Politica',
+    cronaca: 'Cronaca',
+    economia: 'Economia',
+    sport: 'Sport',
+    tecnologia: 'Tecnologia',
+    mondo: 'Mondo',
   }[category];
 }
 
