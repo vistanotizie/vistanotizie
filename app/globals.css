@@ -339,3 +339,21 @@ img {
     padding: 18px;
   }
 }
+
+.top-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.top-menu a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.top-menu a:hover {
+  color: var(--primary);
+}
