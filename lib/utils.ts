@@ -138,12 +138,21 @@ export async function getNews(category?: NewsCategory): Promise<Article[]> {
   const feeds = category ? FEEDS.filter((feed) => feed.category === category) : FEEDS;
   const all = (await Promise.all(feeds.map((feed) => fetchFeed(feed.url, feed.source, feed.category)))).flat();
 
-  const unique = new Map<string, Article>();
-  for (const article of all) {
-    if (!unique.has(article.link)) {
-      unique.set(article.link, article);
-    }
+const unique = new Map<string, Article>();
+
+for (const article of all) {
+  const normalizedTitle = article.title
+    .toLowerCase()
+    .replace(/[^\w\sàèéìòù]/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const key = `${normalizedTitle.slice(0, 80)}-${article.category}`;
+
+  if (!unique.has(key)) {
+    unique.set(key, article);
   }
+}
 
   return [...unique.values()]
     .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
