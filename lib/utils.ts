@@ -28,7 +28,7 @@ function stripHtml(input: string): string {
     .trim();
 }
 
-function truncate(text: string, max = 220): string {
+function truncate(text: string, max = 120): string {
   if (text.length <= max) return text;
   return `${text.slice(0, max).trimEnd()}…`;
 }
