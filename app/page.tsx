@@ -95,15 +95,7 @@ const sections = [
           <NewsGrid articles={articles.slice(0, 6)} />
         </section>
       ))}
-            {sections.map((articles, index) => (
-        <section
-          id={categories[index].key}
-          className="section-block"
-          key={categories[index].key}
-        >
-          ...
-        </section>
-      ))}
+
 
       <Footer />
     </main>
