@@ -11,7 +11,7 @@ export function Header() {
           VistaNotizie
         </Link>
         <p className="brand-subtitle">
-          News reali da RSS, riassunti AI, immagini dinamiche e lettura moderna.
+          Cronaca, economia, tecnologia e attualità in tempo reale.
         </p>
       </div>
 
