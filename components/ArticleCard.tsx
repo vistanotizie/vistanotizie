@@ -4,6 +4,7 @@ import { formatDate, getCategoryLabel } from '@/lib/utils';
 
 export function ArticleCard({ article }: { article: Article }) {
   return (
+  <Link href={`/articolo/${article.id}`} className="card-link">
     <article className="card">
       <img src={article.image} alt={article.title} className="card-image" />
       <div className="card-body">
@@ -15,14 +16,15 @@ export function ArticleCard({ article }: { article: Article }) {
         <h2>{article.title}</h2>
         <p>{article.excerpt}</p>
         <div className="card-actions">
-          <Link href={`/articolo/${article.id}`} className="button primary">
-            Apri dettaglio
-          </Link>
+          <span className="button primary">
+            Leggi articolo
+          </span>
           <a href={article.link} target="_blank" rel="noreferrer" className="button ghost">
-            Fonte originale
+            Vai alla fonte
           </a>
         </div>
       </div>
     </article>
+    </Link>
   );
 }
