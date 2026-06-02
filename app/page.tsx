@@ -26,11 +26,13 @@ export default async function HomePage() {
 
       <section className="hero">
         <div>
-          <span className="hero-badge">Next.js + Vercel</span>
-          <h1>Il tuo sito news moderno, già pronto per la pubblicazione.</h1>
+          <span className="hero-badge">Aggiornamento continuo</span>
+          
+          <h1>Le ultime notizie dall'Italia e dal mondo</h1>
+          
           <p>
-            VistaNotizie aggrega feed RSS reali, mostra immagini dinamiche, apre una pagina dettaglio per ogni
-            articolo e genera un riassunto AI direttamente dal server.
+            Cronaca, economia, tecnologia e attualità raccolte dalle principali fonti informative,
+            aggiornate automaticamente durante la giornata.
           </p>
         </div>
         <div className="hero-panel">
@@ -39,8 +41,8 @@ export default async function HomePage() {
             <span>notizie in primo piano</span>
           </div>
           <div>
-            <strong>4</strong>
-            <span>sezioni tematiche</span>
+            <strong>24/7</strong>
+            <span>aggiornamento continuo</span>
           </div>
           <div>
             <strong>AI</strong>
@@ -52,7 +54,7 @@ export default async function HomePage() {
       <section className="section-block">
         <div className="section-heading">
           <h2>Prime notizie</h2>
-          <p>Le più recenti da fonti RSS reali.</p>
+          <p>Le notizie più recenti selezionate dalle fonti disponibili.</p>
         </div>
         <NewsGrid articles={featured} />
       </section>
