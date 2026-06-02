@@ -350,10 +350,13 @@ img {
 .top-menu a {
   text-decoration: none;
   color: var(--muted);
-  font-weight: 600;
-  transition: 0.2s;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .top-menu a:hover {
   color: var(--primary);
+  background: rgba(37, 99, 235, 0.08);
 }
