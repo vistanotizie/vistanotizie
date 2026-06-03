@@ -54,14 +54,19 @@ function fallbackImage(title: string, category: string): string {
 }
 
 function summaryFromFields(...values: Array<string | undefined>): string {
-  const joined = values
+  const parts = values
     .filter(Boolean)
     .map((value) => stripHtml(String(value)))
+    .filter(Boolean);
+
+  const uniqueParts = [...new Set(parts)];
+
+  const joined = uniqueParts
     .join(' ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  return truncate(joined || 'Apri l’articolo per il riepilogo completo e il riassunto AI.');
+  return truncate(joined || 'Apri l’articolo per leggere il contenuto disponibile.');
 }
 
 function normalizeItem(item: any, source: string, category: NewsCategory): Article | null {
