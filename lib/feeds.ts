@@ -42,4 +42,34 @@ export const FEEDS: FeedConfig[] = [
     source: 'ANSA · Mondo',
     category: 'mondo',
   },
+    {
+    url: 'https://www.rainews.it/rss/politica.xml',
+    source: 'Rai News · Politica',
+    category: 'politica',
+  },
+  {
+    url: 'https://www.rainews.it/rss/cronaca.xml',
+    source: 'Rai News · Cronaca',
+    category: 'cronaca',
+  },
+  {
+    url: 'https://www.rainews.it/rss/economia.xml',
+    source: 'Rai News · Economia',
+    category: 'economia',
+  },
+  {
+    url: 'https://www.rainews.it/rss/sport.xml',
+    source: 'Rai News · Sport',
+    category: 'sport',
+  },
+  {
+    url: 'https://www.rainews.it/rss/scienza-e-tecnologia.xml',
+    source: 'Rai News · Tecnologia',
+    category: 'tecnologia',
+  },
+  {
+    url: 'https://www.rainews.it/rss/esteri.xml',
+    source: 'Rai News · Mondo',
+    category: 'mondo',
+  },
 ];
