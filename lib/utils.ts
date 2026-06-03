@@ -85,17 +85,29 @@ function normalizeItem(item: any, source: string, category: NewsCategory): Artic
     extractImageFromHtml(content),
   ].filter(Boolean) as string[];
 
-  return {
-    id: buildId(link),
-    title: rawTitle,
-    link,
-    source,
-    category,
-    publishedAt: normalizeDate(item.pubDate || item.published || item.updated),
-    image: mediaCandidates[0] || fallbackImage(rawTitle, category),
-    excerpt: summaryFromFields(description, content),
-    content: stripHtml(content || description || rawTitle),
-  };
+  const excerpt = summaryFromFields(description, content);
+const contentText = stripHtml(content || description || rawTitle);
+
+const normalizedTitle = rawTitle.toLowerCase().replace(/\s+/g, ' ').trim();
+const normalizedExcerpt = excerpt.toLowerCase().replace(/\s+/g, ' ').trim();
+
+const finalExcerpt =
+  normalizedExcerpt.includes(normalizedTitle) ||
+  normalizedTitle.includes(normalizedExcerpt)
+    ? ''
+    : excerpt;
+
+return {
+  id: buildId(link),
+  title: rawTitle,
+  link,
+  source,
+  category,
+  publishedAt: normalizeDate(item.pubDate || item.published || item.updated),
+  image: mediaCandidates[0] || fallbackImage(rawTitle, category),
+  excerpt: finalExcerpt,
+  content: contentText,
+};
 }
 
 function extractItems(parsed: any): any[] {
