@@ -53,6 +53,18 @@ function fallbackImage(title: string, category: string): string {
   return `/api/og?${params.toString()}`;
 }
 
+function cleanForCompare(text: string): string {
+  return stripHtml(text)
+    .toLowerCase()
+    .replace(/[^\w\sàèéìòù]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function removeSourceFromGoogleTitle(title: string): string {
+  return title.replace(/\s-\s[^-]+$/g, '').trim();
+}
+
 function summaryFromFields(...values: Array<string | undefined>): string {
   const parts = values
     .filter(Boolean)
@@ -66,31 +78,28 @@ function summaryFromFields(...values: Array<string | undefined>): string {
     .replace(/\s+/g, ' ')
     .trim();
 
-  return truncate(joined || 'Apri l’articolo per leggere il contenuto disponibile.');
-}
-
-function cleanForCompare(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\sàèéìòù]/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return truncate(joined || '');
 }
 
 function isRepeatedText(title: string, excerpt: string): boolean {
-  const titleWords = cleanForCompare(title).split(' ').filter((w) => w.length > 3);
-  const excerptText = cleanForCompare(excerpt);
+  const cleanTitle = cleanForCompare(removeSourceFromGoogleTitle(title));
+  const cleanExcerpt = cleanForCompare(excerpt);
 
-  if (!excerptText) return true;
+  if (!cleanExcerpt) return true;
+  if (cleanTitle === cleanExcerpt) return true;
+  if (cleanTitle.includes(cleanExcerpt)) return true;
+  if (cleanExcerpt.includes(cleanTitle)) return true;
 
-  const commonWords = titleWords.filter((word) => excerptText.includes(word));
+  const titleWords = cleanTitle.split(' ').filter((word) => word.length > 3);
+  const commonWords = titleWords.filter((word) => cleanExcerpt.includes(word));
 
   return commonWords.length >= Math.min(5, titleWords.length);
 }
 
-
 function normalizeItem(item: any, source: string, category: NewsCategory): Article | null {
   const rawTitle = stripHtml(item.title || 'Senza titolo');
+  const cleanTitle = removeSourceFromGoogleTitle(rawTitle);
+
   const link = item.link || item.guid || '';
   if (!link) return null;
 
@@ -105,29 +114,22 @@ function normalizeItem(item: any, source: string, category: NewsCategory): Artic
     extractImageFromHtml(content),
   ].filter(Boolean) as string[];
 
-  const excerpt = summaryFromFields(description, content);
-const contentText = stripHtml(content || description || rawTitle);
+  const rawExcerpt = summaryFromFields(description, content);
+  const contentText = stripHtml(content || description || cleanTitle);
 
-const normalizedTitle = rawTitle.toLowerCase().replace(/\s+/g, ' ').trim();
-const normalizedExcerpt = excerpt.toLowerCase().replace(/\s+/g, ' ').trim();
+  const finalExcerpt = isRepeatedText(cleanTitle, rawExcerpt) ? '' : rawExcerpt;
 
-const finalExcerpt =
-  normalizedExcerpt.includes(normalizedTitle) ||
-  normalizedTitle.includes(normalizedExcerpt)
-    ? ''
-    : excerpt;
-
-return {
-  id: buildId(link),
-  title: rawTitle,
-  link,
-  source,
-  category,
-  publishedAt: normalizeDate(item.pubDate || item.published || item.updated),
-  image: mediaCandidates[0] || fallbackImage(rawTitle, category),
-  excerpt: finalExcerpt,
-  content: contentText,
-};
+  return {
+    id: buildId(link),
+    title: cleanTitle,
+    link,
+    source,
+    category,
+    publishedAt: normalizeDate(item.pubDate || item.published || item.updated),
+    image: mediaCandidates[0] || fallbackImage(cleanTitle, category),
+    excerpt: finalExcerpt,
+    content: contentText,
+  };
 }
 
 function extractItems(parsed: any): any[] {
@@ -173,23 +175,23 @@ async function fetchFeed(url: string, source: string, category: NewsCategory): P
 export async function getNews(category?: NewsCategory): Promise<Article[]> {
   const maxItems = Number(process.env.RSS_MAX_ITEMS || 120);
   const feeds = category ? FEEDS.filter((feed) => feed.category === category) : FEEDS;
-  const all = (await Promise.all(feeds.map((feed) => fetchFeed(feed.url, feed.source, feed.category)))).flat();
 
-const unique = new Map<string, Article>();
+  const all = (
+    await Promise.all(
+      feeds.map((feed) => fetchFeed(feed.url, feed.source, feed.category)),
+    )
+  ).flat();
 
-for (const article of all) {
-  const normalizedTitle = article.title
-    .toLowerCase()
-    .replace(/[^\w\sàèéìòù]/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const unique = new Map<string, Article>();
 
-  const key = `${normalizedTitle.slice(0, 80)}-${article.category}`;
+  for (const article of all) {
+    const normalizedTitle = cleanForCompare(article.title);
+    const key = `${normalizedTitle.slice(0, 80)}-${article.category}`;
 
-  if (!unique.has(key)) {
-    unique.set(key, article);
+    if (!unique.has(key)) {
+      unique.set(key, article);
+    }
   }
-}
 
   return [...unique.values()]
     .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
@@ -225,6 +227,7 @@ export function getCategoryLabel(category: NewsCategory): string {
 
 export function localSummary(text: string): string {
   const cleaned = stripHtml(text).replace(/\s+/g, ' ').trim();
+
   if (!cleaned) {
     return 'Nessun contenuto disponibile per il riassunto.';
   }
