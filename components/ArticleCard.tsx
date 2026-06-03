@@ -14,7 +14,7 @@ export function ArticleCard({ article }: { article: Article }) {
           <span>{formatDate(article.publishedAt)}</span>
         </div>
         <h2>{article.title}</h2>
-        <p>{article.excerpt}</p>
+        {article.excerpt && <p>{article.excerpt}</p>}
         <div className="card-actions">
           <span className="button primary">
             Leggi articolo
