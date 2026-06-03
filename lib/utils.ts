@@ -69,6 +69,26 @@ function summaryFromFields(...values: Array<string | undefined>): string {
   return truncate(joined || 'Apri l’articolo per leggere il contenuto disponibile.');
 }
 
+function cleanForCompare(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\sàèéìòù]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isRepeatedText(title: string, excerpt: string): boolean {
+  const titleWords = cleanForCompare(title).split(' ').filter((w) => w.length > 3);
+  const excerptText = cleanForCompare(excerpt);
+
+  if (!excerptText) return true;
+
+  const commonWords = titleWords.filter((word) => excerptText.includes(word));
+
+  return commonWords.length >= Math.min(5, titleWords.length);
+}
+
+
 function normalizeItem(item: any, source: string, category: NewsCategory): Article | null {
   const rawTitle = stripHtml(item.title || 'Senza titolo');
   const link = item.link || item.guid || '';
