@@ -91,6 +91,14 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
 
           <div className="card-actions">
+            <Link href="/" className="button ghost">
+              ← Torna alla home
+            </Link>
+
+            <Link href={`/#${article.category}`} className="button ghost">
+            Altre notizie della categoria
+            </Link>
+            
             <a
               href={article.link}
               target="_blank"
