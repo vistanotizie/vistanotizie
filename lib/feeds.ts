@@ -8,43 +8,38 @@ export interface FeedConfig {
 
 export const FEEDS: FeedConfig[] = [
   {
-    url: 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News Italia',
+    url: 'https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml',
+    source: 'ANSA · Top News',
     category: 'top',
   },
   {
-    url: 'https://news.google.com/rss/search?q=politica&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Politica',
+    url: 'https://www.ansa.it/sito/notizie/politica/politica_rss.xml',
+    source: 'ANSA · Politica',
     category: 'politica',
   },
   {
-    url: 'https://news.google.com/rss/search?q=cronaca&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Cronaca',
+    url: 'https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml',
+    source: 'ANSA · Cronaca',
     category: 'cronaca',
   },
   {
-    url: 'https://news.google.com/rss/search?q=economia&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Economia',
+    url: 'https://www.ansa.it/sito/notizie/economia/economia_rss.xml',
+    source: 'ANSA · Economia',
     category: 'economia',
   },
   {
-    url: 'https://news.google.com/rss/search?q=sport&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Sport',
+    url: 'https://www.ansa.it/sito/notizie/sport/sport_rss.xml',
+    source: 'ANSA · Sport',
     category: 'sport',
   },
   {
-    url: 'https://news.google.com/rss/search?q=tecnologia&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Tecnologia',
+    url: 'https://www.ansa.it/canale_tecnologia/notizie/tecnologia_rss.xml',
+    source: 'ANSA · Tecnologia',
     category: 'tecnologia',
   },
   {
-    url: 'https://news.google.com/rss/search?q=mondo&hl=it&gl=IT&ceid=IT:it',
-    source: 'Google News · Mondo',
+    url: 'https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml',
+    source: 'ANSA · Mondo',
     category: 'mondo',
-  },
-  {
-    url: 'https://www.ansa.it/sito/ansait_rss.xml',
-    source: 'ANSA',
-    category: 'top',
   },
 ];
