@@ -139,7 +139,7 @@ async function fetchFeed(url: string, source: string, category: NewsCategory): P
 }
 
 export async function getNews(category?: NewsCategory): Promise<Article[]> {
-  const maxItems = Number(process.env.RSS_MAX_ITEMS || 40);
+  const maxItems = Number(process.env.RSS_MAX_ITEMS || 120);
   const feeds = category ? FEEDS.filter((feed) => feed.category === category) : FEEDS;
   const all = (await Promise.all(feeds.map((feed) => fetchFeed(feed.url, feed.source, feed.category)))).flat();
 
