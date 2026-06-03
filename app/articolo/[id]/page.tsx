@@ -84,10 +84,10 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
 
           <h1>{article.title}</h1>
-          <p className="lead">{article.excerpt}</p>
+          
 
           <div className="article-copy">
-            <p>{article.content}</p>
+            <p>{article.content || article.excerpt}</p>
           </div>
 
           <div className="card-actions">
